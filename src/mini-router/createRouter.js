@@ -2,10 +2,10 @@ import { reactive, readonly } from 'vue'
 import RouterLink from './component/RouterLink.vue';
 import RouterView from './component/RouterView.vue';
 import { createMatcher } from './createMatcher';
-import { isObject, isString } from './utils';
+import { isObject, isString, isNumber } from './utils';
 
 export function createRouter(options) {
-    const { routes, history = 'hash', debug = false } = options;
+    const { routes, history = 'hash', debug = false, scrollBehavior } = options;
 
     const log = (...args) => {
         console.log('[mini-vue-router]', ...args)
@@ -208,7 +208,26 @@ export function createRouter(options) {
                     console.log('afterEach hook Error:', err)
                 }
             })
+
+            // 实现滑动的过程
+            if (scrollBehavior) {
+                const position = scrollBehavior(to, from, window.scrollY)
+                scrollTo(position)
+            }
             log('视图更新完成')
+        }
+
+        function scrollTo(position) {
+            if (!position) return
+
+            if (isNumber(position)) {
+                window.scrollTo(0, position)
+            } else if (position.top !== undefined) {
+                window.scrollTo(position.top, position.left || 0)
+            } else if (position.el) {
+                const el = document.querySelector(position.el)
+                el.scrollIntoView(position.behavior || 'smooth')
+            }
         }
 
         const router = {

@@ -31,7 +31,16 @@ export const router = createRouter({
         { path: '/about', component: About},
         { path: '/meta', component: Meta, meta: { auth: true, title: '管理员界面' }}
     ],
-    debug: true // 开启日志
+    debug: true, // 开启日志
+    scrollBehavior(to, from, savedPosition){
+        if(savedPosition){
+            return savedPosition // 恢复原来的位置
+        } else if (to.hash){
+            return { el: to.hash } // 有hash 滚动到元素
+        } else {
+            return { top: 0 } // 默认滚动到顶部
+        }
+    }
 })
 
 

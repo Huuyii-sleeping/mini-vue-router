@@ -11,3 +11,7 @@ export const isString = (obj) => {
 export const isFunction = (obj) => {
     return typeof obj === 'function'
 }
+
+export const isNumber = (obj) => {
+    return typeof obj === 'number'
+}
