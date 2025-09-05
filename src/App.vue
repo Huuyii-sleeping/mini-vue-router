@@ -8,14 +8,19 @@
       <router-link to="/login">Login</router-link>
       <router-link to="/about">about</router-link>
       <router-link to="/meta">meta</router-link>
+      <router-link to="/settings">settings</router-link>
     </nav>
     <router-view></router-view>
+    <router-view name="sidebar"></router-view>
+    <router-view name="footer"></router-view>
   </div>
 </template>
 
 <script setup lang="ts">
 </script>
 
-<style scoped lang="scss">
-
+<style>
+.router-link{
+  margin-right: 20px;
+}
 </style>

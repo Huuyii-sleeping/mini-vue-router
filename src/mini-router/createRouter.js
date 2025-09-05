@@ -220,13 +220,17 @@ export function createRouter(options) {
         function scrollTo(position) {
             if (!position) return
 
+            /**
+             *  window.scoll(x,y) scrollTo(options) 页面滚动到指定的位置
+             *  scrolltoView([options]) 让某个元素滚动到指定区域内
+             */
             if (isNumber(position)) {
-                window.scrollTo(0, position)
+                window.scrollTo(0, position)  // 滚动到指定的位置
             } else if (position.top !== undefined) {
-                window.scrollTo(position.top, position.left || 0)
+                window.scrollTo(position.top, position.left || 0) // 滚动到指定的坐标
             } else if (position.el) {
                 const el = document.querySelector(position.el)
-                el.scrollIntoView(position.behavior || 'smooth')
+                el.scrollIntoView(position.behavior || 'smooth') // 动画方式
             }
         }
 

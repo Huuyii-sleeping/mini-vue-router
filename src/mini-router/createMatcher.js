@@ -16,6 +16,7 @@
 function createRouteRecord(record, path, dep, name) {
     const children = record?.children
     const meta = record?.meta
+    
     return {
         path,
         component: record.component,

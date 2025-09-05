@@ -39,12 +39,10 @@ const props = defineProps({
 const comRef = ref() // 用来访问的组件实例对象
 const currentComponent = ref<any>(null) // 当前要进行渲染的组件
 const lastInstance = ref()
-// 监听路由的变化
-if(props.name){
-    currentComponent.value = router.matchName(props.name)
-}
+// 监听路由的变化 
 watch(() => currentRoute.current, async (to, from) => {
     const matches = router.match(to)
+    console.log("matches:", matches)
     if(!matches.length) {
         currentComponent.value = null
         return
@@ -55,7 +53,18 @@ watch(() => currentRoute.current, async (to, from) => {
         return
     }
     
+    console.log("currentMatch:", currentMatch)
+    
     let Component = currentMatch.record.component
+    if(props.name){
+        if(router.matchName(props.name)){
+            Component = router.matchName(props.name)
+        } else if(currentMatch.record.component[props.name]){
+            Component = currentMatch.record.component[props.name]
+        } else {
+            Component = null
+        }
+    }
 
     // 执行离开守卫，lastInstance上一个页面
     if (lastInstance.value && isFunction(lastInstance.value.beforeRouteEnter)) {

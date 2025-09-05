@@ -6,36 +6,42 @@ import Test1 from "@/component/test1.vue";
 import Test2 from "@/component/test2.vue";
 import Admin from "@/component/Admin.vue";
 import Login from "@/component/Login.vue";
-import About from "@/component/about.vue";
+import About from "@/component/About.vue";
 import Meta from "@/component/Meta.vue";
+import Settings from "@/component/settings/Settings.vue";
+import SettingFooter from "@/component/settings/SettingFooter.vue";
+import SettingSidebar from "@/component/settings/SettingSidebar.vue";
 
 export const router = createRouter({
     history: 'history',
     routes: [
-        { path: '/', component: Home, name: 'Home'},
-        { path: '/user', component: User, name: 'User', children: [
-            {
-                path: '/test1',
-                component: Test1,
-                name: 'test1'
-            },
-            {
-                path: '/test2',
-                component: Test2,
-                name: 'test2'
-            }
-        ]},
-        { path: '/problem/:id', component: Problem, name: 'Problem'},
+        { path: '/', component: Home, name: 'Home' },
+        {
+            path: '/user', component: User, name: 'User', children: [
+                {
+                    path: '/test1',
+                    component: Test1,
+                    name: 'test1'
+                },
+                {
+                    path: '/test2',
+                    component: Test2,
+                    name: 'test2'
+                }
+            ]
+        },
+        { path: '/problem/:id', component: Problem, name: 'Problem' },
         { path: '/admin', component: Admin, name: 'Admin' },
-        { path: '/login', component: Login, name: 'Login'},
-        { path: '/about', component: About},
-        { path: '/meta', component: Meta, meta: { auth: true, title: '管理员界面' }}
+        { path: '/login', component: Login, name: 'Login' },
+        { path: '/about', component: About },
+        { path: '/meta', component: Meta, meta: { auth: true, title: '管理员界面' } },
+        { path: '/settings', component: { default: Settings, sidebar: SettingSidebar, footer: SettingFooter } }
     ],
     debug: true, // 开启日志
-    scrollBehavior(to, from, savedPosition){
-        if(savedPosition){
+    scrollBehavior(to, from, savedPosition) {
+        if (savedPosition) {
             return savedPosition // 恢复原来的位置
-        } else if (to.hash){
+        } else if (to.hash) {
             return { el: to.hash } // 有hash 滚动到元素
         } else {
             return { top: 0 } // 默认滚动到顶部
