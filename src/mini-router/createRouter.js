@@ -22,30 +22,48 @@ export function createRouter(options) {
     // 路由守卫的注册
     const beforeHooks = []
     const afterHooks = []
+    const errorHooks = []
+
     // 守卫链式执行， 支持多个守卫
     function runBeforeHooks(to, from, next) {
         let index = 0
 
         const runNext = (pathOrBool) => {
             // 如果传入字符串（重定向）或者 false（取消）直接结束
-            if (isString(pathOrBool)){
+            if (isString(pathOrBool)) {
                 return next(pathOrBool)
-            } else if(pathOrBool === false) {
+            } else if (pathOrBool === false) {
                 return next(false)
             }
 
-            // 所有的守卫执行完毕
-            if(index >= beforeHooks.length){
+            // 所有的守卫执行完毕 才放行
+            if (index >= beforeHooks.length) {
                 return next()
             }
 
-            // 执行当前的守卫
             const hook = beforeHooks[index]
-            index ++
-            hook(to, from, runNext)
+            index++
+            
+            try {
+                // 执行当前的守卫
+                hook(to, from, runNext)
+            } catch (error) {
+                triggerError(error)
+            }
         }
         // 开始执行
         runNext()
+    }
+
+    // 全局的错误处理 注意：是在before和error都抛出错误，这两个错误都需要catch到，才行
+    function triggerError(err){
+        errorHooks.forEach(hook => {
+            try {
+                hook(err)
+            } catch (error) {
+                console.warn('Error in error hook:', error)
+            }
+        })
     }
 
     if (history === 'hash') {
@@ -136,7 +154,7 @@ export function createRouter(options) {
                 }
                 to = path
             }
-            
+
             // 执行对应的守卫函数
             const from = state.current
             runBeforeHooks(to, from, (result) => {
@@ -145,9 +163,9 @@ export function createRouter(options) {
 
         }
 
-        function finalizeNavigation(to, from, result){
+        function finalizeNavigation(to, from, result) {
             // 进行重定向操作
-            if(isString(result)){
+            if (isString(result)) {
                 state.current = result
                 window.history.pushState(null, '', result)
                 // render() // 手动触发渲染
@@ -156,7 +174,7 @@ export function createRouter(options) {
                  *  在router-view当中
                  *  所以不需要再次手动的触发渲染函数
                  */
-            } else if(result === false){
+            } else if (result === false) {
                 // 取消跳转
                 console.log('跳转取消')
             } else {
@@ -193,8 +211,11 @@ export function createRouter(options) {
             beforeEach(fn) {
                 beforeHooks.push(fn)
             },
-            afterEach(fn){
+            afterEach(fn) {
                 afterHooks.push(fn)
+            },
+            onError(fn) {
+                errorHooks.push(fn)
             }
         }
 

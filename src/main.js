@@ -11,8 +11,16 @@ router.beforeEach((to, from, next) => {
     }
 })
 
+// router.beforeEach(() => {
+//     throw new Error('出错了')
+// })
+
 router.afterEach((from, to) => {
     console.log(`导航完成：${from} - ${to}`)
+})
+
+router.onError((err) => {
+    throw new Error('导航出错:', err)
 })
 
 createApp(App).use(router).mount('#app')
