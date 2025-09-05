@@ -11,4 +11,8 @@ router.beforeEach((to, from, next) => {
     }
 })
 
+router.afterEach((from, to) => {
+    console.log(`导航完成：${from} - ${to}`)
+})
+
 createApp(App).use(router).mount('#app')

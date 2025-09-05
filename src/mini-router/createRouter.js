@@ -21,6 +21,7 @@ export function createRouter(options) {
 
     // 路由守卫的注册
     const beforeHooks = []
+    const afterHooks = []
     // 守卫链式执行， 支持多个守卫
     function runBeforeHooks(to, from, next) {
         let index = 0
@@ -139,12 +140,12 @@ export function createRouter(options) {
             // 执行对应的守卫函数
             const from = state.current
             runBeforeHooks(to, from, (result) => {
-                finalizeNavigation(to, result)
+                finalizeNavigation(to, from, result)
             })
 
         }
 
-        function finalizeNavigation(to, result){
+        function finalizeNavigation(to, from, result){
             // 进行重定向操作
             if(isString(result)){
                 state.current = result
@@ -164,6 +165,15 @@ export function createRouter(options) {
                 window.history.pushState(null, '', to)
                 // render()
             }
+
+            afterHooks.forEach(hook => {
+                try {
+                    hook(to, from)
+                } catch (err) {
+                    console.log('afterEach hook Error:', err)
+                }
+            })
+
         }
 
         const router = {
@@ -182,6 +192,9 @@ export function createRouter(options) {
             },
             beforeEach(fn) {
                 beforeHooks.push(fn)
+            },
+            afterEach(fn){
+                afterHooks.push(fn)
             }
         }
 
