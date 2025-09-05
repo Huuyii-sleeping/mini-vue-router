@@ -13,7 +13,7 @@
 
 // 实现命名式路由的写法
 
-function createRouteRecord(record, path){
+function createRouteRecord(record, path) {
     return {
         path,
         component: record.component,
@@ -22,12 +22,12 @@ function createRouteRecord(record, path){
 }
 
 // 进行路由的转换
-function pathToRegex(path){
+function pathToRegex(path) {
     const names = []
     // 实现正则的匹配
     const regex = path.replace(/:([^\/]+)/g, (_, p1) => {
-      names.push(p1)
-      return '([^\/]+)'
+        names.push(p1)
+        return '([^\/]+)'
     }).replace(/\//g, '\\/')
 
     return {
@@ -36,30 +36,46 @@ function pathToRegex(path){
     }
 }
 
-export function createMatcher(routes){
+export function createMatcher(routes) {
     const matchers = []
+
+    // 支持子路由的操作
+    function registerRoute(route, parentPath = '') { 
+        // 多个斜杠的替换
+        const fullPath = parentPath ? (parentPath + '/' + route.path).replace(/\/+/g, '/') : route.path
     
-    routes.forEach(route => {
-        const record = createRouteRecord(route, route.path)
+        // 创建记录加入到record当中
+        const record = createRouteRecord(route, fullPath)
         matchers.push(record)
+
+        if(route.children && Array.isArray(route.children)){
+            route.children.forEach(child => {
+                // 递归的调用 实现matcher的完善
+                registerRoute(child, fullPath)
+            })
+        }
+    }
+
+    routes.forEach(route => {
+        registerRoute(route)
     })
 
     // 路由匹配函数，用来提取路由当中的动态参数。 eg： /user/123 => 123
-    function match(path){
+    function match(path) {
         for (const record of matchers) {
             const result = record.regex.pattern.exec(path)
-            if(result){ // 能够进行匹配
+            if (result) { // 能够进行匹配
                 const params = {}
                 record.regex.keys.forEach((key, i) => {
                     params[key] = result[i + 1]
                 })
                 return {
-                    matched: record,
+                    matched: record, // 获取对应的路由记录实现数据的传递
                     params,
                 }
             }
         }
-        
+
         return {
             matched: null,
             params: {},
@@ -68,7 +84,7 @@ export function createMatcher(routes){
 
     return {
         match,
-        addRoute(route){
+        addRoute(route) {
             matchers.push(createRouteRecord(route, route.path))
         }
     }
