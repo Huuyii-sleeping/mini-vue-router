@@ -7,6 +7,7 @@ import Test2 from "@/component/test2.vue";
 import Admin from "@/component/Admin.vue";
 import Login from "@/component/Login.vue";
 import About from "@/component/about.vue";
+import Meta from "@/component/Meta.vue";
 
 export const router = createRouter({
     history: 'history',
@@ -27,7 +28,8 @@ export const router = createRouter({
         { path: '/problem/:id', component: Problem, name: 'Problem'},
         { path: '/admin', component: Admin, name: 'Admin' },
         { path: '/login', component: Login, name: 'Login'},
-        { path: '/about', component: About}
+        { path: '/about', component: About},
+        { path: '/meta', component: Meta, meta: { auth: true, title: '管理员界面' }}
     ],
     debug: true // 开启日志
 })
