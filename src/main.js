@@ -3,12 +3,14 @@ import App from './App.vue'
 import { router } from './router'
 
 router.beforeEach((to, from, next) => {
+    // console.log(`导航开始: ${from} - ${to}`)
     const isLogin = localStorage.getItem('isLogin') === 'true'
     if(to.startsWith('/admin') && !isLogin){
         next('/login')
     } else {
         next()
     }
+    
 })
 
 // router.beforeEach(() => {

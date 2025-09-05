@@ -5,7 +5,11 @@ import { createMatcher } from './createMatcher';
 import { isObject, isString } from './utils';
 
 export function createRouter(options) {
-    const { routes, history = 'hash' } = options;
+    const { routes, history = 'hash', debug = false } = options;
+
+    const log = (...args) => {
+        console.log('[mini-vue-router]', ...args)
+    }
 
     const matcher = createMatcher(routes)
 
@@ -43,6 +47,7 @@ export function createRouter(options) {
 
             const hook = beforeHooks[index]
             index++
+            log('执行守卫', index, ':', hook.name || 'anonymous')
 
             try {
                 // 执行当前的守卫
@@ -61,7 +66,7 @@ export function createRouter(options) {
             try {
                 hook(err)
             } catch (error) {
-                console.warn('Error in error hook:', error)
+                log('Error in error hook:', error)
             }
         })
     }
@@ -124,11 +129,12 @@ export function createRouter(options) {
     } else if (history === 'history') {
 
         function init() {
-            const history = window.location.pathname.slice(1) || '/'
+            // 不能slice保持完整的路径
+            const history = window.location.pathname || '/'
             state.current = history
 
             window.addEventListener('popstate', () => {
-                state.current = window.location.pathname.slice(1) || '/'
+                state.current = window.location.pathname || '/'
             })
         }
 
@@ -143,7 +149,7 @@ export function createRouter(options) {
             if (isObject(to)) {
                 // 命名的形式进行路由的跳转
                 const { name, params } = to
-                if(to.replace) replace = true
+                if (to.replace) replace = true
                 const route = nameMap.get(name)
                 let path = route.path
                 // 进行动态参数的替换 将id等动态参数进行替换操作
@@ -174,6 +180,7 @@ export function createRouter(options) {
         function finalizeNavigation(to, from, result, replace) {
             // 进行重定向操作
             if (isString(result)) {
+                log('守卫通过,跳转到:', result)
                 state.current = result
                 window.history.pushState(null, '', result)
                 // render() // 手动触发渲染
@@ -184,9 +191,10 @@ export function createRouter(options) {
                  */
             } else if (result === false) {
                 // 取消跳转
-                console.log('跳转取消')
+                console.log('守卫阻止跳转')
             } else {
                 // 正常放行
+                log('守卫通过,跳转到:', to)
                 state.current = to
                 if (replace) window.history.replaceState(null, '', to)
                 else window.history.pushState(null, '', to)
@@ -200,11 +208,11 @@ export function createRouter(options) {
                     console.log('afterEach hook Error:', err)
                 }
             })
-
+            log('视图更新完成')
         }
 
         const router = {
-            current: readonly(state.current),
+            current: readonly(state),
             push,
             install(app) {
                 app.component('RouterLink', RouterLink)
@@ -226,7 +234,7 @@ export function createRouter(options) {
             onError(fn) {
                 errorHooks.push(fn)
             },
-            matchName(name){
+            matchName(name) {
                 return matcher.matchName(name)
             }
         }

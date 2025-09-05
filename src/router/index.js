@@ -29,7 +29,7 @@ export const router = createRouter({
         { path: '/login', component: Login, name: 'Login'},
         { path: '/about', component: About}
     ],
-    
+    debug: true // 开启日志
 })
 
 

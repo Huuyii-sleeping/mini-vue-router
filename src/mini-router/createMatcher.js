@@ -14,12 +14,14 @@
 // 实现命名式路由的写法
 
 function createRouteRecord(record, path, dep, name) {
+    const children = record?.children
     return {
         path,
         component: record.component,
         regex: pathToRegex(path),
         dep,
-        name
+        name,
+        children
     }
 }
 
@@ -42,7 +44,7 @@ export function createMatcher(routes) {
     const matchers = []
 
     // 支持子路由的操作
-    function registerRoute(route, parentPath = '', dep) { 
+    function registerRoute(route, parentPath = '', dep) {
         // 多个斜杠的替换
         const fullPath = parentPath ? (parentPath + '/' + route.path).replace(/\/+/g, '/') : route.path
         // 创建记录加入到record当中
@@ -51,7 +53,7 @@ export function createMatcher(routes) {
 
         matchers.push(record)
 
-        if(route.children && Array.isArray(route.children)){
+        if (route.children && Array.isArray(route.children)) {
             route.children.forEach(child => {
                 // 递归的调用 实现matcher的完善
                 registerRoute(child, fullPath, dep + 1, child.name)
@@ -63,38 +65,60 @@ export function createMatcher(routes) {
         registerRoute(route, '', 0)
     })
 
-    function matchName(name){
+    function matchName(name) {
         let component
         matchers.forEach(match => {
-            if(match.name === name){
+            if (match.name === name) {
                 component = match.component
             }
         })
-        console.log('name匹配成功:',component)
+        console.log('name匹配成功:', component)
         return component
     }
-    
+
+    console.log(matchers)
 
     // 路由匹配函数，用来提取路由当中的动态参数。 eg： /user/123 => 123
+    // function match(path) {
+    //     for (const record of matchers) {
+    //         const result = record.regex.pattern.exec(path)
+    //         if (result) { // 能够进行匹配
+    //             const params = {}
+    //             record.regex.keys.forEach((key, i) => {
+    //                 params[key] = result[i + 1]
+    //             })
+    //             return {
+    //                 matched: record, // 获取对应的路由记录实现数据的传递
+    //                 params,
+    //             }
+    //         }
+    //     }
+
+    //     return {
+    //         matched: null,
+    //         params: {},
+    //     }
+    // }
+
     function match(path) {
+        const matched = []
         for (const record of matchers) {
             const result = record.regex.pattern.exec(path)
-            if (result) { // 能够进行匹配
+            if (result) {
                 const params = {}
                 record.regex.keys.forEach((key, i) => {
                     params[key] = result[i + 1]
                 })
-                return {
-                    matched: record, // 获取对应的路由记录实现数据的传递
-                    params,
-                }
+                matched.push({
+                    record,
+                    params
+                })
             }
         }
 
-        return {
-            matched: null,
-            params: {},
-        }
+        // 按深度排序，确保父在前
+        matched.sort((a, b) => a.record.depth - b.record.depth)
+        return matched
     }
 
     return {

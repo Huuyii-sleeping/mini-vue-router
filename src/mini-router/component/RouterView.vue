@@ -11,9 +11,12 @@ const currentRoute = inject('currentRoute') as any
 const props = defineProps({
     name: {
         type: String
+    },
+    depth: {
+        type: Number,
+        default: 0
     }
 })
-console.log(props.name)
 
 // const matchedComponent = computed(() => {
 //     const match = router.match(currentRoute.current)
@@ -41,14 +44,18 @@ if(props.name){
     currentComponent.value = router.matchName(props.name)
 }
 watch(() => currentRoute.current, async (to, from) => {
-    const match = router.match(to)
-    console.log(match)
-    let Component = match.matched?.component
-    // 没有匹配到组件实例直接进行返回
-    if (!Component) { 
+    const matches = router.match(to)
+    if(!matches.length) {
         currentComponent.value = null
         return
     }
+    const currentMatch = matches[props.depth]
+    if (!currentMatch) { 
+        currentComponent.value = null
+        return
+    }
+    
+    let Component = currentMatch.record.component
 
     // 执行离开守卫，lastInstance上一个页面
     if (lastInstance.value && isFunction(lastInstance.value.beforeRouteEnter)) {
