@@ -2,7 +2,7 @@ import { reactive, readonly } from 'vue'
 import RouterLink from './component/RouterLink.vue';
 import RouterView from './component/RouterView.vue';
 import { createMatcher } from './createMatcher';
-import { isObject } from './utils';
+import { isObject, isString } from './utils';
 
 export function createRouter(options) {
     const { routes, history = 'hash' } = options;
@@ -10,7 +10,6 @@ export function createRouter(options) {
     const matcher = createMatcher(routes)
 
     const nameMap = new Map()
-    // 将所有正确的的路由进行映射
     routes.forEach(route => {
         if (!route.name) return
         nameMap.set(route.name, route)
@@ -19,6 +18,34 @@ export function createRouter(options) {
     const state = reactive({
         current: '/'
     })
+
+    // 路由守卫的注册
+    const beforeHooks = []
+    // 守卫链式执行， 支持多个守卫
+    function runBeforeHooks(to, from, next) {
+        let index = 0
+
+        const runNext = (pathOrBool) => {
+            // 如果传入字符串（重定向）或者 false（取消）直接结束
+            if (isString(pathOrBool)){
+                return next(pathOrBool)
+            } else if(pathOrBool === false) {
+                return next(false)
+            }
+
+            // 所有的守卫执行完毕
+            if(index >= beforeHooks.length){
+                return next()
+            }
+
+            // 执行当前的守卫
+            const hook = beforeHooks[index]
+            index ++
+            hook(to, from, runNext)
+        }
+        // 开始执行
+        runNext()
+    }
 
     if (history === 'hash') {
         // 初始化 默认hash模式
@@ -76,7 +103,7 @@ export function createRouter(options) {
         return router
 
     } else if (history === 'history') {
-        
+
         function init() {
             const history = window.location.pathname.slice(1) || '/'
             state.current = history
@@ -92,13 +119,13 @@ export function createRouter(options) {
                 const { name, params } = to
                 const route = nameMap.get(name)
                 let path = route.path
-                // 进行动态参数的替换
-                if(params){
+                // 进行动态参数的替换 将id等动态参数进行替换操作
+                if (params) {
                     const newArr = path.split('/')
                     for (const key in params) {
                         const param = params[key]
                         newArr.forEach((content, index) => {
-                            if(content.includes(key)){
+                            if (content.includes(key)) {
                                 console.log("路由成功匹配")
                                 newArr[index] = param
                             }
@@ -106,18 +133,41 @@ export function createRouter(options) {
                     }
                     path = newArr.join('/')
                 }
-            
-                state.current = path
-                window.history.pushState(null, '', path)
-            } else {
-                state.current = to
-                window.history.pushState(null, '', to)
+                to = path
             }
+            
+            // 执行对应的守卫函数
+            const from = state.current
+            runBeforeHooks(to, from, (result) => {
+                finalizeNavigation(to, result)
+            })
 
         }
 
+        function finalizeNavigation(to, result){
+            // 进行重定向操作
+            if(isString(result)){
+                state.current = result
+                window.history.pushState(null, '', result)
+                // render() // 手动触发渲染
+                /** 
+                 *  我的代码当中已经对state.current进行监听
+                 *  在router-view当中
+                 *  所以不需要再次手动的触发渲染函数
+                 */
+            } else if(result === false){
+                // 取消跳转
+                console.log('跳转取消')
+            } else {
+                // 正常放行
+                state.current = to
+                window.history.pushState(null, '', to)
+                // render()
+            }
+        }
+
         const router = {
-            current: state.current,
+            current: readonly(state.current),
             push,
             install(app) {
                 app.component('RouterLink', RouterLink)
@@ -129,6 +179,9 @@ export function createRouter(options) {
             },
             match(to) {
                 return matcher.match(to)
+            },
+            beforeEach(fn) {
+                beforeHooks.push(fn)
             }
         }
 

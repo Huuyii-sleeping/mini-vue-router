@@ -4,6 +4,8 @@ import User from "@/component/User.vue"
 import Problem from "@/component/Problem.vue";
 import Test1 from "@/component/test1.vue";
 import Test2 from "@/component/test2.vue";
+import Admin from "@/component/Admin.vue";
+import Login from "@/component/Login.vue";
 
 export const router = createRouter({
     history: 'history',
@@ -20,5 +22,10 @@ export const router = createRouter({
             }
         ]},
         { path: '/problem/:id', component: Problem, name: 'Problem'},
-    ]
+        { path: '/admin', component: Admin, name: 'Admin' },
+        { path: '/login', component: Login, name: 'Login'},
+    ],
+    
 })
+
+
