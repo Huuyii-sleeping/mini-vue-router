@@ -8,6 +8,12 @@ import { inject, ref, nextTick, defineAsyncComponent, watch } from 'vue'
 import { isFunction } from '../utils'
 const router = inject('router') as any
 const currentRoute = inject('currentRoute') as any
+const props = defineProps({
+    name: {
+        type: String
+    }
+})
+console.log(props.name)
 
 // const matchedComponent = computed(() => {
 //     const match = router.match(currentRoute.current)
@@ -27,13 +33,16 @@ const currentRoute = inject('currentRoute') as any
 // })
 
 // 需要对代码进行重构，组件的实例对象没有拿到 以及和 组件实际重复
-
 const comRef = ref() // 用来访问的组件实例对象
 const currentComponent = ref<any>(null) // 当前要进行渲染的组件
 const lastInstance = ref()
 // 监听路由的变化
+if(props.name){
+    currentComponent.value = router.matchName(props.name)
+}
 watch(() => currentRoute.current, async (to, from) => {
     const match = router.match(to)
+    console.log(match)
     let Component = match.matched?.component
     // 没有匹配到组件实例直接进行返回
     if (!Component) { 
@@ -93,7 +102,6 @@ watch(() => currentRoute.current, async (to, from) => {
         })
     }
 })
-
 
 </script>
 

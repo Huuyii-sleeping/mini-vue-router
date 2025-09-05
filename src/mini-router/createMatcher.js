@@ -13,12 +13,13 @@
 
 // 实现命名式路由的写法
 
-function createRouteRecord(record, path, dep) {
+function createRouteRecord(record, path, dep, name) {
     return {
         path,
         component: record.component,
         regex: pathToRegex(path),
-        dep
+        dep,
+        name
     }
 }
 
@@ -45,14 +46,15 @@ export function createMatcher(routes) {
         // 多个斜杠的替换
         const fullPath = parentPath ? (parentPath + '/' + route.path).replace(/\/+/g, '/') : route.path
         // 创建记录加入到record当中
-        const record = createRouteRecord(route, fullPath, dep)
+        const name = route.name
+        const record = createRouteRecord(route, fullPath, dep, name)
 
         matchers.push(record)
 
         if(route.children && Array.isArray(route.children)){
             route.children.forEach(child => {
                 // 递归的调用 实现matcher的完善
-                registerRoute(child, fullPath, dep + 1)
+                registerRoute(child, fullPath, dep + 1, child.name)
             })
         }
     }
@@ -61,9 +63,20 @@ export function createMatcher(routes) {
         registerRoute(route, '', 0)
     })
 
+    function matchName(name){
+        let component
+        matchers.forEach(match => {
+            if(match.name === name){
+                component = match.component
+            }
+        })
+        console.log('name匹配成功:',component)
+        return component
+    }
+    
+
     // 路由匹配函数，用来提取路由当中的动态参数。 eg： /user/123 => 123
     function match(path) {
-        console.log('matchers:',matchers)
         for (const record of matchers) {
             const result = record.regex.pattern.exec(path)
             if (result) { // 能够进行匹配
@@ -88,6 +101,7 @@ export function createMatcher(routes) {
         match,
         addRoute(route) {
             matchers.push(createRouteRecord(route, route.path))
-        }
+        },
+        matchName
     }
 }

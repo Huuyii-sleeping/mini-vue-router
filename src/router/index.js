@@ -16,10 +16,12 @@ export const router = createRouter({
             {
                 path: '/test1',
                 component: Test1,
+                name: 'test1'
             },
             {
                 path: '/test2',
                 component: Test2,
+                name: 'test2'
             }
         ]},
         { path: '/problem/:id', component: Problem, name: 'Problem'},

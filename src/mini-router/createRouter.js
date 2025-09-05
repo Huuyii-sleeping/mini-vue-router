@@ -225,6 +225,9 @@ export function createRouter(options) {
             },
             onError(fn) {
                 errorHooks.push(fn)
+            },
+            matchName(name){
+                return matcher.matchName(name)
             }
         }
 
