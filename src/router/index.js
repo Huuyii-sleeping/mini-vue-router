@@ -9,13 +9,13 @@ export const router = createRouter({
     history: 'history',
     routes: [
         { path: '/', component: Home, name: 'Home'},
-        { path: '/user', component: User, name: 'User', chilren: [
+        { path: '/user', component: User, name: 'User', children: [
             {
-                path: '/user/test1',
+                path: '/test1',
                 component: Test1,
             },
             {
-                path: '/user/test2',
+                path: '/test2',
                 component: Test2,
             }
         ]},

@@ -8,7 +8,6 @@ export function createRouter(options) {
     const { routes, history = 'hash' } = options;
 
     const matcher = createMatcher(routes)
-    console.log("matcher:",matcher)
 
     const nameMap = new Map()
     // 将所有正确的的路由进行映射
@@ -16,7 +15,6 @@ export function createRouter(options) {
         if (!route.name) return
         nameMap.set(route.name, route)
     })
-    console.log("nameMap:",nameMap)
 
     const state = reactive({
         current: '/'
