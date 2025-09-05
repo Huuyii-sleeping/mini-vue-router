@@ -43,7 +43,7 @@ export function createRouter(options) {
 
             const hook = beforeHooks[index]
             index++
-            
+
             try {
                 // 执行当前的守卫
                 hook(to, from, runNext)
@@ -56,7 +56,7 @@ export function createRouter(options) {
     }
 
     // 全局的错误处理 注意：是在before和error都抛出错误，这两个错误都需要catch到，才行
-    function triggerError(err){
+    function triggerError(err) {
         errorHooks.forEach(hook => {
             try {
                 hook(err)
@@ -133,9 +133,17 @@ export function createRouter(options) {
         }
 
         function push(to) {
+
+            // 不要重复点击相同页面的跳转
+            const normalizedTo = isString(to) ? to : to.path
+            if (state.current === normalizedTo) {
+                return
+            }
+            let replace = false
             if (isObject(to)) {
                 // 命名的形式进行路由的跳转
                 const { name, params } = to
+                if(to.replace) replace = true
                 const route = nameMap.get(name)
                 let path = route.path
                 // 进行动态参数的替换 将id等动态参数进行替换操作
@@ -158,12 +166,12 @@ export function createRouter(options) {
             // 执行对应的守卫函数
             const from = state.current
             runBeforeHooks(to, from, (result) => {
-                finalizeNavigation(to, from, result)
+                finalizeNavigation(to, from, result, replace)
             })
 
         }
 
-        function finalizeNavigation(to, from, result) {
+        function finalizeNavigation(to, from, result, replace) {
             // 进行重定向操作
             if (isString(result)) {
                 state.current = result
@@ -180,7 +188,8 @@ export function createRouter(options) {
             } else {
                 // 正常放行
                 state.current = to
-                window.history.pushState(null, '', to)
+                if (replace) window.history.replaceState(null, '', to)
+                else window.history.pushState(null, '', to)
                 // render()
             }
 

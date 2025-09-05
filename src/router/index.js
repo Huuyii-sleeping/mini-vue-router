@@ -6,6 +6,7 @@ import Test1 from "@/component/test1.vue";
 import Test2 from "@/component/test2.vue";
 import Admin from "@/component/Admin.vue";
 import Login from "@/component/Login.vue";
+import About from "@/component/about.vue";
 
 export const router = createRouter({
     history: 'history',
@@ -24,7 +25,7 @@ export const router = createRouter({
         { path: '/problem/:id', component: Problem, name: 'Problem'},
         { path: '/admin', component: Admin, name: 'Admin' },
         { path: '/login', component: Login, name: 'Login'},
-        { path: '/about', component: () => import('../component/about.vue')}
+        { path: '/about', component: About}
     ],
     
 })

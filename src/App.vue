@@ -7,6 +7,7 @@
       <router-link to="/admin">Admin</router-link>
       <router-link to="/login">Login</router-link>
       <router-link to="/about">about</router-link>
+      
     </nav>
     <router-view></router-view>
   </div>
@@ -15,4 +16,6 @@
 <script setup lang="ts">
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+
+</style>
