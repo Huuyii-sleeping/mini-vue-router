@@ -6,6 +6,7 @@
       <router-link :to="{ name: 'Problem', params: { id: '123' } }">Problem</router-link>
       <router-link to="/admin">Admin</router-link>
       <router-link to="/login">Login</router-link>
+      <router-link to="/about">about</router-link>
     </nav>
     <router-view></router-view>
   </div>

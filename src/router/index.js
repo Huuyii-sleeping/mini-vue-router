@@ -24,6 +24,7 @@ export const router = createRouter({
         { path: '/problem/:id', component: Problem, name: 'Problem'},
         { path: '/admin', component: Admin, name: 'Admin' },
         { path: '/login', component: Login, name: 'Login'},
+        { path: '/about', component: () => import('../component/about.vue')}
     ],
     
 })

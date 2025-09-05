@@ -7,3 +7,7 @@ export const isString = (obj) => {
     return typeof obj === 'string'
 }
 
+
+export const isFunction = (obj) => {
+    return typeof obj === 'function'
+}
